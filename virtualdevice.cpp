@@ -2,8 +2,6 @@
 
 #include "layout.h"
 
-#include <sstream>
-
 #include <libevdev/libevdev-uinput.h>
 #include <libevdev/libevdev.h>
 

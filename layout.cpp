@@ -1,5 +1,5 @@
 #include "layout.h"
-#include "libevdev/libevdev.h"
+#include <libevdev/libevdev.h>
 #include <fstream>
 #include <regex>
 
@@ -63,7 +63,7 @@ Layout parse_layout(const std::filesystem::path &path, std::string model)
         {
             if(el.size() != 6)
                 throw std::runtime_error{"Malformed configuration for " + model + " in " + path.string() +
-                                         ": not enought pad_padding elements"};
+                                         ": not enough pad_padding elements"};
             padding(el[2], el[3], el[4], el[5]);
         }
     }
