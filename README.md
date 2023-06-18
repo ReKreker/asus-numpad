@@ -17,8 +17,24 @@ meson compile -C build
 meson install -C build
 ```
 
-## Supported devices
-* UX333FA
+## Supported numpads
+Like **UX333FA**:
+
+|   |   |   |   |   |
+|---|---|---|---|---|
+| 7 | 8 | 9 | / | ⌫ |
+| 4 | 5 | 6 | * | ⌫ |
+| 1 | 2 | 3 | - | ↵ |
+| 0 | 0 | . | + | ↵ |
+
+Like **M433IA**:
+
+|   |   |   |   |   |
+|---|---|---|---|---|
+| 7 | 8 | 9 | / | ⌫ |
+| 4 | 5 | 6 | * | ⌫ |
+| 1 | 2 | 3 | - | % |
+| 0 | . | ↵ | + | = |
 
 ## Contributing
 You are free to fork and propose pull requests.
