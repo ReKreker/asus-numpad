@@ -1,14 +1,11 @@
 #include "i2cdevice.h"
 
-#include <cstddef>
 #include <fcntl.h>
 #include <filesystem>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
 #include <regex>
 #include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 static __u8 brightness_to_magic(uint8_t brightness)

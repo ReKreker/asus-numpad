@@ -6,8 +6,6 @@
 #include <fcntl.h>
 #include <iostream>
 #include <libevdev/libevdev.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 class Numpad
@@ -18,19 +16,16 @@ class Numpad
         fd = open(filename.c_str(), O_RDONLY);
         int rc = libevdev_new_from_fd(fd, &handle);
         if (rc < 0)
-        {
             throw std::system_error{-rc, std::generic_category(), "failed to init libevdev"};
-        }
+
         info_x = libevdev_get_abs_info(handle, ABS_X);
         if (info_x == nullptr)
-        {
             throw std::runtime_error{"failed to get X axis info for " + filename.string()};
-        }
+
         info_y = libevdev_get_abs_info(handle, ABS_Y);
         if (info_y == nullptr)
-        {
             throw std::runtime_error{"failed to get Y axis info for " + filename.string()};
-        }
+
         btn_x = info_x->maximum * 0.95;
         btn_y = info_y->maximum * 0.07;
     }
@@ -57,9 +52,8 @@ class Numpad
             input_event ev;
             int rc = libevdev_next_event(handle, LIBEVDEV_READ_FLAG_NORMAL, &ev);
             if (rc < 0)
-            {
                 throw std::system_error{-rc, std::generic_category(), "error in libevdev_next_event"};
-            }
+
             switch (ev.type)
             {
             case EV_ABS:
