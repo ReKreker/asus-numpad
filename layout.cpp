@@ -1,10 +1,7 @@
 #include "layout.h"
 #include "libevdev/libevdev.h"
 #include <fstream>
-#include <iostream>
 #include <regex>
-#include <stdexcept>
-#include <string>
 
 Layout parse_layout(const std::filesystem::path &path, std::string model)
 {

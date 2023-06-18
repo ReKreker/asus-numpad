@@ -4,7 +4,6 @@
 #include "virtualdevice.h"
 
 #include <fcntl.h>
-#include <iostream>
 #include <libevdev/libevdev.h>
 #include <unistd.h>
 
@@ -37,7 +36,7 @@ class Numpad
 
     void run()
     {
-        int32_t x, y;
+        float x, y;
         enum class Mode
         {
             Touchpad,
@@ -61,13 +60,10 @@ class Numpad
                 {
                 case ABS_MT_POSITION_X:
                     x = ev.value;
-                    if (mode == Mode::Transition)
+                    if (mode == Mode::Transition && x < btn_x)
                     {
-                        if (x < btn_x)
-                        {
-                            brightness = 1 + (I2cDevice::max_brightness * x) / btn_x;
-                            i2c.set_brightness(brightness);
-                        }
+                        brightness = 1 + (I2cDevice::max_brightness * x) / btn_x;
+                        i2c.set_brightness(brightness);
                     }
                     break;
                 case ABS_MT_POSITION_Y:
@@ -96,13 +92,13 @@ class Numpad
                             numpad.send(EV_KEY, KEY_NUMLOCK, 1);
                             libevdev_grab(handle, LIBEVDEV_GRAB);
                             break;
-                        case Mode::Transition:
-                            break;
                         case Mode::VirtualDevice:
                             i2c.set_brightness(0);
                             mode = Mode::Touchpad;
                             numpad.send(EV_KEY, KEY_NUMLOCK, 0);
                             libevdev_grab(handle, LIBEVDEV_UNGRAB);
+                        default:
+                            break;
                         }
                     }
                     else if (ev.value == 0 and mode == Mode::Transition)
@@ -113,8 +109,8 @@ class Numpad
                     else if (ev.value == 1 and mode == Mode::VirtualDevice)
                     {
                         // Numpad mode, button press
-                        pressed = layout(double(x) / info_x->maximum, double(y) / info_y->maximum);
-                        if (pressed != 0)
+                        pressed = layout(x / info_x->maximum, y / info_y->maximum);
+                        if (pressed)
                         {
                             numpad.send(EV_KEY, pressed, 1);
                         }
