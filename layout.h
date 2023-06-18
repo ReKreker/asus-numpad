@@ -2,24 +2,80 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
 #include <string>
 #include <vector>
+
+class PadPadding
+{
+    float top_, right_, bottom_, left_;
+    uint8_t num_rows_, num_cols_;
+
+  public:
+    explicit PadPadding() : top_(0), right_(0), bottom_(0), left_(0)
+    {
+    }
+    explicit PadPadding(float top, float right, float bottom, float left)
+        : top_(top), right_(right), bottom_(bottom), left_(left)
+    {
+    }
+
+    void operator()(float top, float right, float bottom, float left)
+    {
+        top_ = top;
+        right_ = right;
+        bottom_ = bottom;
+        left_ = left;
+    }
+    void operator()(std::string &top, std::string &right, std::string &bottom, std::string &left)
+    {
+        top_ = std::stof(top);
+        right_ = std::stof(right);
+        bottom_ = std::stof(bottom);
+        left_ = std::stof(left);
+    }
+
+    bool empty(){
+        return !top_ || !right_ || !bottom_ || !left_;
+    }
+
+    void set_pad(uint8_t rows_amount, uint8_t cols_amount)
+    {
+        num_cols_ = cols_amount;
+        num_rows_ = rows_amount;
+    }
+
+    int32_t get_column(float x) const
+    {
+        if (left_ < x && x < 1.0 - right_)
+            return ((x-left_-0.01)*num_cols_)/(1.0 - left_ - right_);
+        return -1;
+    }
+    int32_t get_row(float y) const
+    {
+        if (top_ < y && y < 1.0 - bottom_)
+            return ((y-top_-0.01)*num_rows_)/(1.0 - top_ - bottom_);
+        return -1;
+    }
+};
 
 class Layout
 {
   public:
-    Layout(std::vector<int> keys, uint8_t num_cols, double top_offset)
-        : top_offset{top_offset}, num_cols{num_cols}, keys{keys}
+    Layout(std::vector<int> keys, uint8_t num_cols, PadPadding &padding)
+        : padding_{padding}, num_cols_{num_cols}, keys{keys}
     {
-        num_rows = keys.size() / num_cols;
+        padding_.set_pad(keys.size() / num_cols_, num_cols_);
     }
-    int operator()(double x, double y) const
+    // TODO: add percentage KEY_5 wrapper
+    int operator()(float x, float y) const
     {
-        int32_t col = x * num_cols;
-        int32_t row = (y - top_offset) * num_rows;
-        if (col >= num_cols or row < 0 or row >= num_rows)
+        int32_t col = padding_.get_column(x);
+        int32_t row = padding_.get_row(y);
+        std::cout << std::endl << "Col: " << col << "; Row: " << row << "; x: " << x << "; y: " << y << std::endl;
+        if (col == -1 or row == -1)
             return 0;
-        return keys[col + row * num_cols];
+        return keys[row * num_cols_ + col];
     }
 
     auto begin() const
@@ -32,9 +88,8 @@ class Layout
     }
 
   private:
-    double top_offset;
-    uint8_t num_cols;
-    uint8_t num_rows;
+    PadPadding padding_;
+    uint8_t num_cols_;
     std::vector<int> keys;
 };
 

@@ -17,7 +17,7 @@ Layout parse_layout(const std::filesystem::path &path, std::string model)
     bool model_found = false;
     std::vector<int> keys;
     uint8_t num_cols = 0;
-    double top_offset = 0;
+    PadPadding padding{};
 
     std::regex ws_re{"\\s+"};
     while (db)
@@ -31,7 +31,7 @@ Layout parse_layout(const std::filesystem::path &path, std::string model)
             if (model_found)
                 break;
             num_cols = 0;
-            top_offset = 0;
+            padding(.0f,.0f,.0f,.0f);
             keys.clear();
         }
         std::vector<std::string> el{std::sregex_token_iterator(line.begin(), line.end(), ws_re, -1),
@@ -62,14 +62,17 @@ Layout parse_layout(const std::filesystem::path &path, std::string model)
                 keys.push_back(code);
             }
         }
-        else if (el[0] == "top_offset")
+        else if (el[0] == "pad_padding")
         {
-            top_offset = std::stod(el[2]);
+            if(el.size() != 6)
+                throw std::runtime_error{"Malformed configuration for " + model + " in " + path.string() +
+                                         ": not enought pad_padding elements"};
+            padding(el[2], el[3], el[4], el[5]);
         }
     }
     if (not model_found)
         throw std::runtime_error{"No entry for " + model + " in " + path.string()};
-    if (keys.empty() or num_cols == 0)
+    if (keys.empty() || num_cols == 0 || padding.empty())
         throw std::runtime_error{"Invalid layout for " + model + " in " + path.string()};
-    return Layout{keys, num_cols, top_offset};
+    return Layout{keys, num_cols, padding};
 }
